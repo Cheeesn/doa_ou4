@@ -32,7 +32,7 @@ bool nodes_are_equal(const node *n1,const node *n2)
     }
     else
     {
-        return false;
+        return false;//HEj
     }    
 }
 
