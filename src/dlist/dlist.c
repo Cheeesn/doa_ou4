@@ -35,7 +35,7 @@ struct cell {
 
 struct dlist {
 	struct cell *head;
-	free_function free_func;
+	kill_function free_func;
 };
 
 // ===========INTERNAL FUNCTION IMPLEMENTATIONS============
@@ -47,7 +47,7 @@ struct dlist {
  *
  * Returns: A pointer to the new list.
  */
-dlist *dlist_empty(free_function free_func)
+dlist *dlist_empty(kill_function free_func)
 {
 	// Allocate memory for the list structure.
 	dlist *l = calloc(1, sizeof(*l));
