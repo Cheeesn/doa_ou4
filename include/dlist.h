@@ -45,7 +45,7 @@ typedef struct cell *dlist_pos;
  *
  * Returns: A pointer to the new list.
  */
-dlist *dlist_empty(free_function free_func);
+dlist *dlist_empty(kill_function free_func);
 
 /**
  * dlist_is_empty() - Check if a dlist is empty.
