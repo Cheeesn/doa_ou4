@@ -155,7 +155,8 @@ void create_map(graph *graph, int edges,map *m){
     while(i < edges){
         buffersrc = array_1d_inspect_value(m->src,i);
         bufferdest = array_1d_inspect_value(m->dest,i);
-        printf("%d\n", i);
+        
+        
         node *node1 = graph_find_node(graph, buffersrc);
         node *node2 = graph_find_node(graph, bufferdest);
         
