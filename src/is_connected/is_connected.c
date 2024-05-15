@@ -177,7 +177,8 @@ void create_map(graph *graph, int edges,map *m){
         
         i++;
     }
-    
+    array_1d_kill(m->src);
+    array_1d_kill(m->dest);
 }
 
 void check_file(const char *argv[], int argc, FILE **map_file){
@@ -205,11 +206,8 @@ int main(int argc, const char *argv[]){
     
     int edges;
     check_file(argv,argc,&map_file);
-    
     edges = load_map(map,map_file);
-    
     graph *graph = graph_empty(edges*2);
-    
     create_map(graph,edges,map);
     
     graph_print(graph);
