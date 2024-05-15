@@ -12,19 +12,22 @@
  * must be called to de-allocate the dynamic memory used by the list
  * itself. The de-allocation of any dynamic memory allocated for the
  * element values is the responsibility of the user of the list,
- * unless a free_function is registered in list_empty.
+ * unless a kill_function is registered in list_empty.
  *
  * Authors: Niclas Borlin (niclas@cs.umu.se)
- *	    Adam Dahlgren Lindstrom (dali@cs.umu.se)
- *	    Lars Karlsson (larsk@cs.umu.se)
+ *          Adam Dahlgren Lindstrom (dali@cs.umu.se)
+ *          Lars Karlsson (larsk@cs.umu.se)
  *
  * Based on earlier code by: Johan Eliasson (johane@cs.umu.se).
  *
  * Version information:
- *   v1.0 2018-01-28: First public version.
- *   v1.1 2023-01-19: Added dlist_pos_equal and dlist_pos_is_valid functions.
- *   v1.2 2023-01-20: Renamed dlist_pos_equal to dlist_pos_are_equal.
- *   v1.3 2023-03-23: Renamed dlist_pos_are_equal to dlist_pos_is_equal.
+ *   v1.0  2018-01-28: First public version.
+ *   v1.1  2023-01-19: Added dlist_pos_equal and dlist_pos_is_valid functions.
+ *   v1.2  2023-01-20: Renamed dlist_pos_equal to dlist_pos_are_equal.
+ *   v1.3  2023-03-23: Renamed dlist_pos_are_equal to dlist_pos_is_equal.
+ *   v2.0  2024-03-14: Added dlist_print_internal to output dot code for visualization.
+ *                     Renamed free_* stuff to kill_*. Converted to 4-tabs.
+ *   v2.1  2024-05-10: updated print_internal to enhance encapsulation.
  */
 
 // ==========PUBLIC DATA TYPES============
@@ -40,12 +43,12 @@ typedef struct cell *dlist_pos;
 
 /**
  * dlist_empty() - Create an empty dlist.
- * @free_func: A pointer to a function (or NULL) to be called to
- *	       de-allocate memory on remove/kill.
+ * @kill_func: A pointer to a function (or NULL) to be called to
+ *             de-allocate memory on remove/kill.
  *
  * Returns: A pointer to the new list.
  */
-dlist *dlist_empty(kill_function free_func);
+dlist *dlist_empty(kill_function kill_func);
 
 /**
  * dlist_is_empty() - Check if a dlist is empty.
@@ -57,7 +60,7 @@ bool dlist_is_empty(const dlist *l);
 
 /**
  * dlist_first() - Return the first position of a dlist, i.e. the
- *		   position of the first element in the list.
+ *                 position of the first element in the list.
  * @l: List to inspect.
  *
  * Returns: The first position in the given list.
@@ -70,7 +73,7 @@ dlist_pos dlist_first(const dlist *l);
  * @p: Any valid position except the last in the list.
  *
  * Returns: The position in the list after the given position.
- *	    NOTE: The return value is undefined for the last position.
+ *          NOTE: The return value is undefined for the last position.
  */
 dlist_pos dlist_next(const dlist *l, const dlist_pos p);
 
@@ -85,12 +88,12 @@ bool dlist_is_end(const dlist *l, const dlist_pos p);
 
 /**
  * dlist_inspect() - Return the value of the element at a given
- *		     position in a list.
+ *                   position in a list.
  * @l: List to inspect.
  * @p: Any valid position in the list, except the last.
  *
  * Returns: Returns the value at the given position as a void pointer.
- *	    NOTE: The return value is undefined for the last position.
+ *          NOTE: The return value is undefined for the last position.
  */
 void *dlist_inspect(const dlist *l, const dlist_pos p);
 
@@ -112,7 +115,7 @@ dlist_pos dlist_insert(dlist *l, void *v, const dlist_pos p);
  * @l: List to manipulate.
  * @p: Position in the list of the element to remove.
  *
- * Removes the element at position p from the list. If a free_func
+ * Removes the element at position p from the list. If a kill_func
  * was registered at list creation, calls it to deallocate the memory
  * held by the element value.
  *
@@ -124,16 +127,16 @@ dlist_pos dlist_remove(dlist *l, const dlist_pos p);
  * dlist_kill() - Destroy a given dlist.
  * @l: List to destroy.
  *
- * Return all dynamic memory used by the list and its elements. If a
- * free_func was registered at list creation, also calls it for each
- * element to free any user-allocated memory occupied by the element values.
+ * Returns all dynamic memory used by the list and its elements. If a
+ * kill_func was registered at list creation, also calls it for each
+ * element to return any user-allocated memory occupied by the element values.
  *
  * Returns: Nothing.
  */
 void dlist_kill(dlist *l);
 
 /**
- * dlist_print() - Iterate over the list element and print their values.
+ * dlist_print() - Iterate over the list elements and print their values.
  * @l: List to inspect.
  * @print_func: Function called for each element.
  *
@@ -160,9 +163,37 @@ bool dlist_pos_is_valid(const dlist *l, const dlist_pos p);
  * @p2: Second position to compare.
  *
  * Returns: True if p1 and p2 refer to the same position in l, otherwise False.
- *	    NOTE: The result is defined only if p1 and p2 are valid positions in l.
+ *          NOTE: The result is defined only if p1 and p2 are valid positions in l.
  *          p1 and p2 are assumed to be valid positions in l, no check is performed.
  */
 bool dlist_pos_is_equal(const dlist *l, const dlist_pos p1, const dlist_pos p2);
+
+/**
+ * dlist_print_internal() - Print the lists internal structure in dot format.
+ * @l: List to inspect.
+ * @print_func: Function called for each element value.
+ * @desc: String with a description/state of the list, or NULL for no description.
+ * @indent_level: Indentation level, 0 for outermost
+ *
+ * Iterates over the list and outputs dot code that shows the internal
+ * structure of the list.  The dot code can be visualized by
+ * Graphviz.
+ *
+ * On linux system, the output can be parsed by the dot program, e.g.
+ *
+ *   <list_program> | dot -Tsvg > /tmp/dot.svg; firefox /tmp/dot.svg
+ *
+ * where <list_program> is the name of the executable
+ *
+ * The output may also be possible to visualize online on
+ * https://dreampuf.github.io/GraphvizOnline/ or google "graphviz
+ * online".
+ *
+ * For documention of the dot language, see graphviz.org.
+ *
+ * Returns: Nothing.
+ */
+void dlist_print_internal(const dlist *l, inspect_callback print_func, const char *desc,
+                          int indent_level);
 
 #endif

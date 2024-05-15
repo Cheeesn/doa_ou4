@@ -6,7 +6,7 @@
  * values stored by various data types.
  *
  * Authors: Niclas Borlin (niclas@cs.umu.se)
- *	    Adam Dahlgren Lindstrom (dali@cs.umu.se)
+ *          Adam Dahlgren Lindstrom (dali@cs.umu.se)
  *
  * Based on earlier code by: Johan Eliasson (johane@cs.umu.se).
  *
@@ -23,32 +23,35 @@
 
 // Version constants
 #define CODE_BASE_MAJOR_VERSION 2
-#define CODE_BASE_MINOR_VERSION 1
-#define CODE_BASE_REVISION 0
-#define CODE_BASE_PATCH 0
+#define CODE_BASE_MINOR_VERSION 2
+#define CODE_BASE_REVISION 1
+#define CODE_BASE_PATCH 4
 
 // Create a short version string
-#define CODE_BASE_VERSION "v" \
-    STR(CODE_BASE_MAJOR_VERSION) \
-    "." \
-    STR(CODE_BASE_MINOR_VERSION) \
-    "." \
-    STR(CODE_BASE_REVISION) \
-    "." \
+#define CODE_BASE_VERSION "v"                   \
+    STR(CODE_BASE_MAJOR_VERSION)                \
+    "."                                         \
+    STR(CODE_BASE_MINOR_VERSION)                \
+    "."                                         \
+    STR(CODE_BASE_REVISION)                     \
+    "."                                         \
     STR(CODE_BASE_PATCH)
 
 // Create a version string
-#define CODE_BASE_LONG_VERSION "Version: " \
-    STR(CODE_BASE_MAJOR_VERSION) \
-    "." \
-    STR(CODE_BASE_MINOR_VERSION) \
-    "." \
-    STR(CODE_BASE_REVISION) \
-    "." \
+#define CODE_BASE_LONG_VERSION "Version: "      \
+    STR(CODE_BASE_MAJOR_VERSION)                \
+    "."                                         \
+    STR(CODE_BASE_MINOR_VERSION)                \
+    "."                                         \
+    STR(CODE_BASE_REVISION)                     \
+    "."                                         \
     STR(CODE_BASE_PATCH)
 
 // Type definition for de-allocator function, e.g. free().
 typedef void (*kill_function)(void *);
+
+// For backwards compatibility with pre-v2.0 code.
+typedef kill_function free_function;
 
 // Type definition for read-only callback for single-value containers,
 // used by e.g. print functions.

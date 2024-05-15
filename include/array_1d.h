@@ -21,7 +21,9 @@
  * Based on earlier code by: Johan Eliasson (johane@cs.umu.se).
  *
  * Version information:
- *   v1.0 2018-01-28: First public version.
+ *   v1.0  2018-01-28: First public version.
+ *   v1.5  2024-03-13: Renamed free_* stuff to kill_*. Converted to 4-tabs.
+ *   v2.0  2024-05-10: Added print_internal.
  */
 
 // ==========PUBLIC DATA TYPES============
@@ -122,7 +124,7 @@ void array_1d_print(const array_1d * l, inspect_callback print_func);
  * @a: Array to inspect.
  * @print_func: Function called for each element value.
  * @desc: String with a description/state of the array, or NULL for no description.
- * @outermost: True if the the array is the outermost data type.
+ * @indent_level: Indentation level, 0 for outermost
  *
  * Iterates over the array and outputs dot code that shows the internal
  * structure of the array.  The dot code can be visualized by
@@ -143,6 +145,6 @@ void array_1d_print(const array_1d * l, inspect_callback print_func);
  * Returns: Nothing.
  */
 void array_1d_print_internal(const array_1d *a, inspect_callback print_func, const char *desc,
-                             bool outermost);
+                             int indent_level);
 
 #endif
