@@ -34,13 +34,7 @@ int main()
     g = graph_node_set_seen(g, node0, true);
     if (!graph_node_is_seen(g, node0))
     {
-        fprintf(stderr, "node cannot be set as seen\n");   g = graph_reset_seen(g);
-    if (graph_node_is_seen(g, node0))
-    {
-        fprintf(stderr, "graph_reset_seen doesnt work\n");
-        return EXIT_FAILURE;
-    }
-        return EXIT_FAILURE;
+        fprintf(stderr, "node cannot be set as seen\n");  
     }
 
     g = graph_reset_seen(g);

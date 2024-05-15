@@ -3,7 +3,7 @@ srcPath = ./src
 binPath = ./bin
 cFlags = -g
 
-ExtraCFiles = $(srcPath)/array_2d/array_2d.c $(srcPath)/dlist/dlist.c $(srcPath)/array_1d/array_1d.c
+ExtraCFiles = $(srcPath)/array_2d/array_2d.c $(srcPath)/dlist/dlist.c $(srcPath)/array_1d/array_1d.c $(srcPath)/queue/queue.c $(srcPath)/list/list.c
 
 
 all: bin gcc_comp
