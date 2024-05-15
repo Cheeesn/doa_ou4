@@ -19,8 +19,8 @@ int main()
 
     char *label0 = malloc(sizeof(*label0));
     char *label1 = malloc(sizeof(*label1));
-    *label0 = "hej";
-    *label1 = "hejdå";
+    label0 = "hej";
+    label1 = "hejdå";
 
     g = graph_insert_node(g, label0);
     g = graph_insert_node(g, label1);
@@ -55,7 +55,7 @@ int main()
         return EXIT_FAILURE;
     }
 
-    // graph_print(g);
+    graph_print(g);
 
     graph_kill(g);
 

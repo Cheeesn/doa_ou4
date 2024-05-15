@@ -32,7 +32,7 @@ bool nodes_are_equal(const node *n1,const node *n2)
     }
     else
     {
-        return false;//HEj
+        return false;
     }    
 }
 
@@ -87,7 +87,7 @@ bool graph_has_edges(const graph *g)
 /**
  * graph_insert_node() - Inserts a node with the given name into the graph.
  * @g: Graph to manipulate.
- * @s: Node name.
+ * @s: Node name, memory must be freed outside of graph implementation
  *
  * Creates a new node with a copy of the given name and puts it into
  * the graph.
@@ -97,8 +97,13 @@ bool graph_has_edges(const graph *g)
 graph *graph_insert_node(graph *g, const char *s)
 {
     node* inputNode = malloc(sizeof(*inputNode));
-    inputNode->label = s;
+    inputNode->label = malloc(sizeof(s));
+
+    strcpy(inputNode->label, s);
+
     inputNode->seen = false;
+    inputNode->neighbors = dlist_empty(NULL);
+
     
     dlist_insert(g->nodes, inputNode, dlist_first(g->nodes));
     return g;
@@ -188,11 +193,6 @@ graph *graph_reset_seen(graph *g)
  */
 graph *graph_insert_edge(graph *g, node *n1, node *n2)
 {
-    if (n1->neighbors == NULL)
-    {
-        n1->neighbors = dlist_empty(NULL);
-    }
-    
     dlist_insert(n1->neighbors, n2, dlist_first(n1->neighbors));
     return g;
 }
@@ -230,7 +230,7 @@ graph *graph_delete_node(graph *g, node *n)
  * @g: Graph to manipulate.
  * @n1: Source node (pointer) for the edge.
  * @n2: Destination node (pointer) for the edge.
- *
+ *NULL
  * Returns: The modified graph.
  *
  * NOTE: Undefined if the edge is not in the graph.
@@ -292,11 +292,7 @@ void graph_kill(graph *g)
     while (!dlist_is_end(g->nodes, pos))
     {
         node* current = dlist_inspect(g->nodes, pos);
-        if (current->neighbors != NULL)
-        {
-            dlist_kill(current->neighbors);
-        }
-        
+        dlist_kill(current->neighbors);
         free(current->label);
         free(current);
         pos = dlist_next(g->nodes, pos);
@@ -320,17 +316,20 @@ void graph_print(const graph *g)
     while (!dlist_is_end(g->nodes, pos))
     {
         node* current = dlist_inspect(g->nodes, pos);
-        fprintf(stderr, "label: %s", current->label);
-        dlist_pos posNeighbours = dlist_first(current->neighbors);
-        int neighbourNum = 0;
-        while (!dlist_is_end(current->neighbors, posNeighbours))
+        printf("label: %s\n", current->label);
+        if (!dlist_is_empty(current->neighbors))
         {
-            node* currentNeighbour = dlist_inspect(current->neighbors, posNeighbours);
-            fprintf(stderr, "Neighbor %d: %s", neighbourNum, currentNeighbour->label);
-            neighbourNum++;
-            posNeighbours = dlist_next(current->neighbors, posNeighbours);
-        }
+            dlist_pos posNeighbours = dlist_first(current->neighbors);
+            int neighbourNum = 0;
+            while (!dlist_is_end(current->neighbors, posNeighbours))
+            {
+                node* currentNeighbour = dlist_inspect(current->neighbors, posNeighbours);
+                printf("   Neighbor %d: %s\n", neighbourNum, currentNeighbour->label);
+                neighbourNum++;
+                posNeighbours = dlist_next(current->neighbors, posNeighbours);
+            }
         
+        }
         pos = dlist_next(g->nodes, pos);
     }
 }
