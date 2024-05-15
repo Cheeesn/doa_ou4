@@ -4,84 +4,13 @@
 #include <stdbool.h>
 #include "graph.h"
 #include "array_1d.h"
-
+#include <string.h>
 #define MAXNODENAME 40
 #define BUFSIZE 400
 typedef struct map{
     array_1d *src;
     array_1d *dest;
 }map;
-
-int load_map(map *map, FILE *fp) {
-    
-    char buffer[BUFSIZE];
-    char buffernode1[MAXNODENAME];
-    char buffernode2[MAXNODENAME];
-    bool find_start = false;
-    int edges,i = 0;
-    char buffer[BUFSIZE];
-
-    while(!find_start || fgets(buffer,BUFSIZE,fp)){
-            
-        if(!line_is_blank || !line_is_comment){
-            edges = atoi(fgets(buffer,BUFSIZE,fp));
-            find_start = true;
-        }
-
-    }
-    if(edges == 0){
-        fprintf(stderr,"File doesnt contain an integer for edges\n");
-        exit(EXIT_FAILURE);
-    }
-    map->src = array_1d_create(0,edges*2,NULL);
-    map->dest = array_1d_create(0,edges*2,NULL);
-    while(i < edges){
-        if(parse_map_lines(buffer,buffernode1,buffernode2) == 2){
-            array_1d_set_value(map->src,buffernode1,i);
-            array_1d_set_value(map->dest,buffernode2,i);
-        }
-
-        else {
-            fprintf(stderr,"File doesnt follow specifications\n");
-            exit(EXIT_FAILURE);
-        }
-        i++;
-    }
-    return edges;
-}
-void create_map(graph *graph, int edges,map *m){
-
-    int i = 0;
-    
-    char *buffersrc;
-    char *bufferdest;
-    
-    while(i < edges){
-        buffersrc = array_1d_inspect_value(m->src,i);
-        bufferdest = array_1d_inspect_value(m->dest,i);
-        
-        node *node1 = graph_find_node(graph, buffersrc);
-        node *node2 = graph_find_node(graph, bufferdest);
-
-        
-        if(node1 == NULL){
-            graph = graph_insert_node(graph, buffersrc);
-            node2 = graph_find_node(graph, buffersrc);
-
-        }
-        if(node2 == NULL){
-            graph = graph_insert_node(graph, bufferdest);
-            node2 = graph_find_node(graph, buffersrc);
-
-        }
-        
-        graph = graph_insert_edge(graph,node1, bufferdest);
-            
-        
-        
-        i++;
-    }
-}
 /**
  * @brief Find position of first non-whitespace character.
  *
@@ -164,7 +93,91 @@ int parse_map_line(const char *buf, char *n1, char *n2)
     // number of node names.
     return n;
 }
-void check_file(char *argv[], int argc, FILE *map_file){
+int load_map(map *map, FILE *fp) {
+    
+    char buffer[BUFSIZE];
+    
+    char buffernode1[MAXNODENAME];
+    char buffernode2[MAXNODENAME];
+    bool find_start = false;
+    int edges = 0;
+    int i = 0;
+    char * my_copy;
+    
+    while(!find_start){
+        
+        fgets(buffer,BUFSIZE-1,fp);
+        
+        if(!line_is_blank(buffer) && !line_is_comment(buffer)){
+            
+            edges = atoi(buffer);
+            find_start = true;
+            
+        }
+        
+    }
+        
+    
+    if(edges == 0){
+        fprintf(stderr,"File doesnt contain an integer for edges\n");
+        exit(EXIT_FAILURE);
+    }
+    map->src = array_1d_create(0,edges*2,free);
+    map->dest = array_1d_create(0,edges*2,free);
+    while(i < edges){
+        fgets(buffer,BUFSIZE-1,fp);
+        
+        if(parse_map_line(buffer,buffernode1,buffernode2) == 2){
+            my_copy = malloc(sizeof(char) * MAXNODENAME);
+            strcpy(my_copy,buffernode1);
+
+            array_1d_set_value(map->src,my_copy,i);
+            my_copy = malloc(sizeof(char) * MAXNODENAME);
+            strcpy(my_copy,buffernode2);
+            array_1d_set_value(map->dest,my_copy,i);
+        }
+
+        else {
+            fprintf(stderr,"File doesnt follow specifications\n");
+            exit(EXIT_FAILURE);
+        }
+        i++;
+    }
+    return edges;
+}
+void create_map(graph *graph, int edges,map *m){
+
+    int i = 0;
+    
+    char *buffersrc;
+    char *bufferdest;
+    
+    while(i < edges){
+        buffersrc = array_1d_inspect_value(m->src,i);
+        bufferdest = array_1d_inspect_value(m->dest,i);
+        
+        node *node1 = graph_find_node(graph, buffersrc);
+        node *node2 = graph_find_node(graph, bufferdest);
+
+        
+        if(node1 == NULL){
+            graph = graph_insert_node(graph, buffersrc);
+            node2 = graph_find_node(graph, buffersrc);
+
+        }
+        if(node2 == NULL){
+            graph = graph_insert_node(graph, bufferdest);
+            node2 = graph_find_node(graph, buffersrc);
+
+        }
+        
+        graph = graph_insert_edge(graph,node1, node2);
+            
+        i++;
+    }
+}
+
+void check_file(const char *argv[], int argc, FILE **map_file){
     
     if(argc != 2) {
         
@@ -172,10 +185,10 @@ void check_file(char *argv[], int argc, FILE *map_file){
         exit(EXIT_FAILURE);
     }
 
-    map_file = fopen(argv[1], "r"); 
+    *map_file = fopen(argv[1], "r"); 
 
-    if(map_file == NULL) {
-        fclose(map_file);
+    if(*map_file == NULL) {
+        
         fprintf(stderr,"Could not open file: %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
@@ -184,9 +197,18 @@ void check_file(char *argv[], int argc, FILE *map_file){
 int main(int argc, const char *argv[]){
 
     FILE *map_file = NULL;
+    map *map = malloc(sizeof(*map));
+    int i = 0;
+    int edges;
+    check_file(argv,argc,&map_file);
     
-    check_file(*argv,argc,&map_file);
-    
-    
+    edges = load_map(map,map_file);
+    char *src,*dest;
+    while(i < edges){
+        src = array_1d_inspect_value(map->src, i);
+        dest = array_1d_inspect_value(map->dest, i);
+        printf("src: %s dest: %s\n", src, dest);
+        i++;
+    }
 
 }
