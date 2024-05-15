@@ -122,7 +122,7 @@ node *graph_find_node(const graph *g, const char *s)
     while (!dlist_is_end(g->nodes, pos))
     {
         node* current = dlist_inspect(g->nodes, pos);
-        if (strcmp(current->label, s))
+        if (strcmp(current->label, s) == 0)
         {
             return current;
         }
