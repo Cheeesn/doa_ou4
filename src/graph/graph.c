@@ -6,14 +6,14 @@
 
 typedef struct node 
 {
-    char* label;
-    bool seen;
-    dlist* neighbors;
+    char* label;//The nodes name, numeric string
+    bool seen;//A bool corresponding if it has been seen
+    dlist* neighbors;//A list including all neighbours to the node
 } node;
 
 typedef struct graph 
 {
-    dlist* nodes;
+    dlist* nodes;//A list of the nodes inside the graph
 } graph;
 
 /**
@@ -27,7 +27,7 @@ typedef struct graph
 bool nodes_are_equal(const node *n1,const node *n2)
 {
     if (strcmp(n1->label, n2->label) && n1->neighbors == n2->neighbors)
-    {
+    {//To be considered the same node the name and neighbour list must also be the same
         return true;
     }
     else
@@ -44,9 +44,9 @@ bool nodes_are_equal(const node *n1,const node *n2)
  */
 graph *graph_empty(int max_nodes)
 {
-    dlist* nodes = dlist_empty(NULL);
-    graph* graph = malloc(sizeof(*graph));
-    graph->nodes = nodes;
+    dlist* nodes = dlist_empty(NULL);//Create an empty list of the nodes
+    graph* graph = malloc(sizeof(*graph));//Allocate to heap the graph struct
+    graph->nodes = nodes;//Give graph the node list
     return graph;
 }
 
@@ -58,7 +58,7 @@ graph *graph_empty(int max_nodes)
  */
 bool graph_is_empty(const graph *g)
 {
-    return dlist_is_empty(g->nodes);
+    return dlist_is_empty(g->nodes);//If the list of nodes is empty, then graph is empty
 }
 
 /**
@@ -73,7 +73,7 @@ bool graph_has_edges(const graph *g)
     while (!dlist_is_end(g->nodes, pos))
     {
         node* currentNode = dlist_inspect(g->nodes, pos);
-        if(currentNode->neighbors != NULL)
+        if (dlist_is_empty(currentNode->neighbors))//If there isnt any neighbours we have found an edge
         {
             return true;
         }
@@ -99,13 +99,13 @@ graph *graph_insert_node(graph *g, const char *s)
     node* inputNode = malloc(sizeof(*inputNode));
     inputNode->label = malloc(sizeof(s));
 
-    strcpy(inputNode->label, s);
+    strcpy(inputNode->label, s);//Copy input string into label
 
-    inputNode->seen = false;
-    inputNode->neighbors = dlist_empty(NULL);
+    inputNode->seen = false;//Not seen as standard
+    inputNode->neighbors = dlist_empty(NULL);//Create neighbour list
 
     
-    dlist_insert(g->nodes, inputNode, dlist_first(g->nodes));
+    dlist_insert(g->nodes, inputNode, dlist_first(g->nodes));//Insert node into graph
     return g;
 }
 
@@ -123,13 +123,13 @@ node *graph_find_node(const graph *g, const char *s)
     {
         node* current = dlist_inspect(g->nodes, pos);
         if (strcmp(current->label, s) == 0)
-        {
+        {//If match at label and search string (s) we have found the right node
             return current;
         }
         pos = dlist_next(g->nodes, pos);
     }
 
-    return NULL;
+    return NULL;//No node with the label of search string (s)
 }
 
 /**
@@ -173,12 +173,12 @@ graph *graph_reset_seen(graph *g)
     dlist_pos pos = dlist_first(g->nodes);
     while (!dlist_is_end(g->nodes, pos))
     {
-        node* current = dlist_inspect(g->nodes, pos);
-        current->seen = false;
+        node* current = dlist_inspect(g->nodes, pos);//Go through every node in graph
+        current->seen = false;//Reset seen bool
         pos = dlist_next(g->nodes, pos);
     }
 
-    return g;
+    return g;//Return a graph will all seen bools reset.
 }
 
 /**
@@ -193,7 +193,7 @@ graph *graph_reset_seen(graph *g)
  */
 graph *graph_insert_edge(graph *g, node *n1, node *n2)
 {
-    dlist_insert(n1->neighbors, n2, dlist_first(n1->neighbors));
+    dlist_insert(n1->neighbors, n2, dlist_first(n1->neighbors));//Add a neighbour to n1
     return g;
 }
 
@@ -212,8 +212,9 @@ graph *graph_delete_node(graph *g, node *n)
     while (!dlist_is_end(g->nodes, pos))
     {
         node* current = dlist_inspect(g->nodes, pos);
-        if (nodes_are_equal(n, current))
+        if (nodes_are_equal(n, current))//Find node to remove
         {
+            //Remove all memory associated with the node
             free(n->label);
             dlist_kill(n->neighbors);
             dlist_remove(g->nodes, pos);
@@ -242,7 +243,7 @@ graph *graph_delete_edge(graph *g, node *n1, node *n2)
     {
         node* current = dlist_inspect(n1->neighbors, posNode1);
         if (nodes_are_equal(n1, current))
-        {
+        {//Find match, and then remove the position from the neighbour list
             dlist_remove(n1->neighbors, posNode1);
             return g;
         }
@@ -275,10 +276,12 @@ node *graph_choose_node(const graph *g)
  */
 dlist *graph_neighbours(const graph *g,const node *n)
 {
-    dlist *copyNeighbours = dlist_empty(NULL);
+    dlist *copyNeighbours = dlist_empty(NULL);//Create a copy of current neighbour list
     dlist_pos pos = dlist_first(n->neighbors);
     while (!dlist_is_end(n->neighbors, pos))
     {
+        //Get out all nodes in the neighbour list, and then add it to the copyNeighbours list
+        
         node* current = dlist_inspect(n->neighbors, pos);
         dlist_insert(copyNeighbours, current, dlist_first(n->neighbors));
     }   
@@ -299,6 +302,9 @@ void graph_kill(graph *g)
     dlist_pos pos = dlist_first(g->nodes);
     while (!dlist_is_end(g->nodes, pos))
     {
+        //Increment through every node in the graph and remove all of the memory assosiated with
+        //that struct (node)
+
         node* current = dlist_inspect(g->nodes, pos);
         dlist_kill(current->neighbors);
         free(current->label);
@@ -306,8 +312,8 @@ void graph_kill(graph *g)
         pos = dlist_next(g->nodes, pos);
     }
 
-    dlist_kill(g->nodes);
-    free(g);
+    dlist_kill(g->nodes);//Destroy node list
+    free(g);//free the last part of the graph
 }
 
 /**
