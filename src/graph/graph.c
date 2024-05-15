@@ -26,7 +26,7 @@ typedef struct graph
  */
 bool nodes_are_equal(const node *n1,const node *n2)
 {
-    if (strcmp(n1->label, n2->label) && n1->neighbors == n2->neighbors)
+    if (strcmp(n1->label, n2->label) == 0)
     {//To be considered the same node the name and neighbour list must also be the same
         return true;
     }
@@ -283,9 +283,10 @@ dlist *graph_neighbours(const graph *g,const node *n)
         //Get out all nodes in the neighbour list, and then add it to the copyNeighbours list
         
         node* current = dlist_inspect(n->neighbors, pos);
-        dlist_insert(copyNeighbours, current, dlist_first(n->neighbors));
+        dlist_insert(copyNeighbours, current, dlist_first(copyNeighbours));
+        pos = dlist_next(n->neighbors, pos);
     }   
-
+    
     return copyNeighbours;
 }
 
