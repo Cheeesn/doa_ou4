@@ -275,7 +275,15 @@ node *graph_choose_node(const graph *g)
  */
 dlist *graph_neighbours(const graph *g,const node *n)
 {
-    return n->neighbors;
+    dlist *copyNeighbours = dlist_empty(NULL);
+    dlist_pos pos = dlist_first(n->neighbors);
+    while (!dlist_is_end(n->neighbors, pos))
+    {
+        node* current = dlist_inspect(n->neighbors, pos);
+        dlist_insert(copyNeighbours, current, dlist_first(n->neighbors));
+    }   
+
+    return copyNeighbours;
 }
 
 /**
