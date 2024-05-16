@@ -144,7 +144,7 @@ int load_map(map *map, FILE *fp) {
         }
         i++;
     }
-    free(my_copy);
+    
     return edges;
 }
 void create_map(graph *graph, int edges,map *m){
@@ -248,7 +248,7 @@ bool find_path(graph *g, node *src, node *dest){
     return false;
 
 }
-void Userinput(graph *g, map *map){
+void Userinput(graph *g){
     char input[MAXNODENAME*2+1];
     char node1buffer[MAXNODENAME];
     char node2buffer[MAXNODENAME];
@@ -303,7 +303,7 @@ int main(int argc, const char *argv[]){
     graph *graph = graph_empty(edges*2);
     create_map(graph,edges,map);
     
-    Userinput(graph,map);
+    Userinput(graph);
 
     
 }
