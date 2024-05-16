@@ -99,8 +99,8 @@ int load_map(map *map, FILE *fp) {
     
     char buffer[BUFSIZE];
     
-    char buffernode1[MAXNODENAME];
-    char buffernode2[MAXNODENAME];
+    char buffernode1[MAXNODENAME+1];
+    char buffernode2[MAXNODENAME+1];
     bool find_start = false;
     int edges = 0;
     int i = 0;
@@ -144,7 +144,7 @@ int load_map(map *map, FILE *fp) {
         }
         i++;
     }
-    
+    fclose(fp);
     return edges;
 }
 void create_map(graph *graph, int edges,map *m){
@@ -228,10 +228,10 @@ bool find_path(graph *g, node *src, node *dest){
                 return true;
             }
 
-            if(!graph_node_is_seen(g,currentnode)){
+            if(!graph_node_is_seen(g,neighbour)){
                 
-                g = graph_node_set_seen(g,currentnode,true);
-                q = queue_enqueue(q,currentnode);
+                g = graph_node_set_seen(g,neighbour,true);
+                q = queue_enqueue(q,neighbour);
             }
             
             pos = dlist_next(neighbourlist, pos);
@@ -250,8 +250,8 @@ bool find_path(graph *g, node *src, node *dest){
 }
 void Userinput(graph *g){
     char input[MAXNODENAME*2+1];
-    char node1buffer[MAXNODENAME];
-    char node2buffer[MAXNODENAME];
+    char node1buffer[MAXNODENAME+1];
+    char node2buffer[MAXNODENAME+1];
     int checkinput = 0;
 
     do{
@@ -264,9 +264,9 @@ void Userinput(graph *g){
         node *dest = graph_find_node(g,node2buffer);
         
         if(strcmp(node1buffer, "quit") == 0){
-            
             graph_kill(g);
             exit(EXIT_SUCCESS);
+            
         }
         
         if(checkinput == 2){
