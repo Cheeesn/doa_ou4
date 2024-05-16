@@ -145,6 +145,7 @@ int load_map(map *map, FILE *fp) {
         i++;
     }
     
+    fclose(fp);
     return edges;
 }
 void create_map(graph *graph, int edges,map *m){
@@ -249,9 +250,9 @@ bool find_path(graph *g, node *src, node *dest){
 
 }
 void Userinput(graph *g){
-    char input[MAXNODENAME*2+1];
-    char node1buffer[MAXNODENAME];
-    char node2buffer[MAXNODENAME];
+    char* input = malloc(sizeof(*input) * MAXNODENAME*2+1);
+    char* node1buffer = malloc(sizeof(*node1buffer) * MAXNODENAME);
+    char* node2buffer = malloc(sizeof(*node2buffer) * MAXNODENAME);
     int checkinput = 0;
 
     do{
@@ -266,7 +267,10 @@ void Userinput(graph *g){
         if(strcmp(node1buffer, "quit") == 0){
             
             graph_kill(g);
-            exit(EXIT_SUCCESS);
+            free(input);
+            free(node1buffer);
+            free(node2buffer);
+            return;
         }
         
         if(checkinput == 2){
@@ -293,7 +297,8 @@ void Userinput(graph *g){
 }
 int main(int argc, const char *argv[]){
 
-    FILE *map_file = NULL;
+    FILE *map_file = NULL;    fclose(map_file);
+
     map *map = malloc(sizeof(*map));
     
     
@@ -305,5 +310,5 @@ int main(int argc, const char *argv[]){
     
     Userinput(graph);
 
-    
+    return 0;
 }

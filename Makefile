@@ -12,9 +12,8 @@ bin:
 	mkdir $(binPath)
 
 gcc_comp:
-	#gcc -Wall -I $(includePath) -o $(binPath)/graph_test $(srcPath)/test_graph.c $(srcPath)/graph/graph.c $(ExtraCFiles) $(cFlags)
-	gcc -Wall -I $(includePath) -o $(binPath)/graph_test $(srcPath)/test_graph.c $(srcPath)/graph2/graph2.c $(ExtraCFiles) $(cFlags)
+	gcc -Wall -I $(includePath) -o $(binPath)/graph_test $(srcPath)/test_graph.c $(srcPath)/graph/graph.c $(ExtraCFiles) $(cFlags)
+	gcc -Wall -I $(includePath) -o $(binPath)/graph2_test $(srcPath)/test_graph.c $(srcPath)/graph2/graph2.c $(ExtraCFiles) $(cFlags)
 
-	#gcc -Wall -I $(includePath) -o $(binPath)/graph_test $(srcPath)/graph_test.c $(srcPath)/graph2/graph2.c $(ExtraCFiles) $(cFlags)
-	#gcc -Wall -I $(includePath) -o $(binPath)/graph $(srcPath)/is_connected/is_connected.c $(srcPath)/graph/graph.c $(ExtraCFiles) $(cFlags)
-	#gcc -Wall -I $(includePath) -o $(binPath)/graph2 $(srcPath)/is_connected/is_connected.c $(srcPath)/graph2/graph2.c $(ExtraCFiles) $(cFlags)
+	gcc -Wall -I $(includePath) -o $(binPath)/graph $(srcPath)/is_connected/is_connected.c $(srcPath)/graph/graph.c $(ExtraCFiles) $(cFlags)
+	gcc -Wall -I $(includePath) -o $(binPath)/graph2 $(srcPath)/is_connected/is_connected.c $(srcPath)/graph2/graph2.c $(ExtraCFiles) $(cFlags)

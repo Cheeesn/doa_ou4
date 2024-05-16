@@ -26,11 +26,7 @@ typedef struct graph
  */
 bool nodes_are_equal(const node *n1,const node *n2)
 {
-<<<<<<< HEAD
-    if (strcmp(n1->label, n2->label))
-=======
     if (strcmp(n1->label, n2->label) == 0)
->>>>>>> main
     {//To be considered the same node the name and neighbour list must also be the same
         return true;
     }
