@@ -118,7 +118,7 @@ graph *graph_insert_node(graph *g, const char *s)
  */
 node *graph_find_node(const graph *g, const char *s)
 {
-    for (int i = array_1d_low(g->nodeMatrixTitles); i <= array_1d_high(g->nodeMatrixTitles); i++)
+    for (int i = 0; i < g->sizeNodeMatrixTitles; i++)
     {
         node *current = array_1d_inspect_value(g->nodeMatrixTitles, i);
         if (strcmp(s, current->label) == 0)
