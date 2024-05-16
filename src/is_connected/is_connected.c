@@ -5,6 +5,8 @@
 #include "graph.h"
 #include "array_1d.h"
 #include <string.h>
+#include "queue.h"
+
 #define MAXNODENAME 40
 #define BUFSIZE 400
 typedef struct map{
@@ -112,12 +114,10 @@ int load_map(map *map, FILE *fp) {
             
             edges = atoi(buffer);
             find_start = true;
-            
         }
         
     }
         
-    
     if(edges == 0){
         fprintf(stderr,"File doesnt contain an integer for edges\n");
         exit(EXIT_FAILURE);
@@ -130,8 +130,9 @@ int load_map(map *map, FILE *fp) {
         if(parse_map_line(buffer,buffernode1,buffernode2) == 2){
             my_copy = malloc(sizeof(char) * MAXNODENAME);
             strcpy(my_copy,buffernode1);
-
+            
             array_1d_set_value(map->src,my_copy,i);
+            
             my_copy = malloc(sizeof(char) * MAXNODENAME);
             strcpy(my_copy,buffernode2);
             array_1d_set_value(map->dest,my_copy,i);
@@ -143,6 +144,7 @@ int load_map(map *map, FILE *fp) {
         }
         i++;
     }
+    free(my_copy);
     return edges;
 }
 void create_map(graph *graph, int edges,map *m){
@@ -172,13 +174,14 @@ void create_map(graph *graph, int edges,map *m){
             
         }
         
-        
         graph = graph_insert_edge(graph,node1, node2);
         
         i++;
     }
     array_1d_kill(m->src);
     array_1d_kill(m->dest);
+    
+    free(m);
 }
 
 void check_file(const char *argv[], int argc, FILE **map_file){
@@ -198,6 +201,96 @@ void check_file(const char *argv[], int argc, FILE **map_file){
     }
 
 }
+bool find_path(graph *g, node *src, node *dest){
+    
+    queue *q  = queue_empty(NULL);
+    
+    g = graph_node_set_seen(g,src,true);
+    q = queue_enqueue(q, src);
+    
+    while(!queue_is_empty(q)){
+        
+        node *currentnode = queue_front(q);
+        q = queue_dequeue(q);
+        dlist *neighbourlist = graph_neighbours(g,currentnode);
+        dlist_pos pos = dlist_first(neighbourlist);
+        
+        
+        while(!dlist_is_end(neighbourlist,pos)){
+            
+            node *neighbour = dlist_inspect(neighbourlist,pos);
+            
+            if(nodes_are_equal(neighbour, dest)){
+                
+                g = graph_reset_seen(g);
+                queue_kill(q);
+                dlist_kill(neighbourlist);
+                return true;
+            }
+
+            if(!graph_node_is_seen(g,currentnode)){
+                
+                g = graph_node_set_seen(g,currentnode,true);
+                q = queue_enqueue(q,currentnode);
+            }
+            
+            pos = dlist_next(neighbourlist, pos);
+            
+        }
+
+    dlist_kill(neighbourlist);
+    
+    }
+
+    
+    queue_kill(q);
+    graph_reset_seen(g);
+    return false;
+
+}
+void Userinput(graph *g, map *map){
+    char input[MAXNODENAME*2+1];
+    char node1buffer[MAXNODENAME];
+    char node2buffer[MAXNODENAME];
+    int checkinput = 0;
+
+    do{
+        printf("Enter origin and destination (quit to exit): ");
+        
+        fgets(input,sizeof(input),stdin);
+        checkinput = parse_map_line(input,node1buffer,node2buffer);
+        
+        node *src = graph_find_node(g,node1buffer);
+        node *dest = graph_find_node(g,node2buffer);
+        
+        if(strcmp(node1buffer, "quit") == 0){
+            
+            graph_kill(g);
+            exit(EXIT_SUCCESS);
+        }
+        
+        if(checkinput == 2){
+            if(graph_find_node(g,node1buffer) == NULL){
+                printf("origin does not exist\n");
+            
+            }
+            else if(graph_find_node(g,node2buffer) == NULL){
+                printf("destination does not exist\n");
+            }
+            else if(find_path(g,src,dest)){
+                
+                printf("path is found\n");
+            }
+            else{
+                printf("there is no path\n");
+            }
+        }
+        else{
+            printf("Invalid input separate location by a space\n");
+        }
+        
+    }while(1);
+}
 int main(int argc, const char *argv[]){
 
     FILE *map_file = NULL;
@@ -210,7 +303,7 @@ int main(int argc, const char *argv[]){
     graph *graph = graph_empty(edges*2);
     create_map(graph,edges,map);
     
-    graph_print(graph);
-    
+    Userinput(graph,map);
 
+    
 }
