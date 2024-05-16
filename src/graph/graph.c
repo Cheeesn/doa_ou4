@@ -26,7 +26,7 @@ typedef struct graph
  */
 bool nodes_are_equal(const node *n1,const node *n2)
 {
-    if (strcmp(n1->label, n2->label) && n1->neighbors == n2->neighbors)
+    if (strcmp(n1->label, n2->label))
     {//To be considered the same node the name and neighbour list must also be the same
         return true;
     }
@@ -44,8 +44,14 @@ bool nodes_are_equal(const node *n1,const node *n2)
  */
 graph *graph_empty(int max_nodes)
 {
-    dlist* nodes = dlist_empty(NULL);//Create an empty list of the nodes
     graph* graph = malloc(sizeof(*graph));//Allocate to heap the graph struct
+    dlist* nodes = dlist_empty(NULL);//Create an empty list of the nodes
+    if (nodes == NULL || graph == NULL)
+    {
+        fprintf(stderr, "Not enought memory, cannot allocate");
+        return NULL;
+    }
+    
     graph->nodes = nodes;//Give graph the node list
     return graph;
 }
@@ -100,7 +106,7 @@ graph *graph_insert_node(graph *g, const char *s)
     inputNode->label = malloc(sizeof(s));
 
     strcpy(inputNode->label, s);//Copy input string into label
-
+/* code */
     inputNode->seen = false;//Not seen as standard
     inputNode->neighbors = dlist_empty(NULL);//Create neighbour list
 
@@ -141,11 +147,7 @@ node *graph_find_node(const graph *g, const char *s)
  */
 bool graph_node_is_seen(const graph *g, const node *n)
 {
-    if (n->seen)
-    {
-        return true;
-    }
-    return false;
+    return n->seen;
 }
 
 /**
@@ -283,7 +285,8 @@ dlist *graph_neighbours(const graph *g,const node *n)
         //Get out all nodes in the neighbour list, and then add it to the copyNeighbours list
         
         node* current = dlist_inspect(n->neighbors, pos);
-        dlist_insert(copyNeighbours, current, dlist_first(n->neighbors));
+        dlist_insert(copyNeighbours, current, dlist_first(copyNeighbours));
+        pos = dlist_next(n->neighbors, pos);
     }   
 
     return copyNeighbours;
@@ -330,7 +333,7 @@ void graph_print(const graph *g)
     while (!dlist_is_end(g->nodes, pos))
     {
         node* current = dlist_inspect(g->nodes, pos);
-        printf("label: %s\n", current->label);
+        printf("%s\n", current->label);
         if (!dlist_is_empty(current->neighbors))
         {
             dlist_pos posNeighbours = dlist_first(current->neighbors);
@@ -338,7 +341,7 @@ void graph_print(const graph *g)
             while (!dlist_is_end(current->neighbors, posNeighbours))
             {
                 node* currentNeighbour = dlist_inspect(current->neighbors, posNeighbours);
-                printf("   Neighbor %d: %s\n", neighbourNum, currentNeighbour->label);
+                printf("   %s \n", currentNeighbour->label);
                 neighbourNum++;
                 posNeighbours = dlist_next(current->neighbors, posNeighbours);
             }
@@ -346,4 +349,5 @@ void graph_print(const graph *g)
         }
         pos = dlist_next(g->nodes, pos);
     }
+    printf("\n");
 }
