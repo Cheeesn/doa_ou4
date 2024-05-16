@@ -1,20 +1,23 @@
 #include <graph.h>
 #include <dlist.h>
 #include <array_2d.h>
+#include <array_1d.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct node 
+typedef struct node
 {
-    char* label;
+    char *label;
     bool seen;
-    array_2d* neighbors;
+    int index;
 } node;
 
-typedef struct graph 
+typedef struct graph
 {
-    array_2d* nodes;
+    array_2d *nodesMatrix;
+    array_1d *nodeMatrixTitles;
+    int sizeNodeMatrixTitles;
 } graph;
 
 /**
@@ -25,27 +28,50 @@ typedef struct graph
  * Returns: true if the nodes are considered equal, otherwise false.
  *
  */
-bool nodes_are_equal(const node *n1,const node *n2)
+bool nodes_are_equal(const node *n1, const node *n2)
 {
-    if (strcmp(n1->label, n2->label) && n1->neighbors == n2->neighbors)
+    if (strcmp(n1->label, n2->label))
     {
         return true;
     }
     else
     {
         return false;
-    }    
+    }
+}
+
+/**
+ * Destroys a node.
+ * 
+ * This function frees the memory allocated for a node and its associated label.
+ * 
+ * @param n A pointer to the node to be destroyed.
+ */
+void destroy_node(void* n)
+{
+    node* nodeToDestroy = (node*)n;
+    free(nodeToDestroy->label);
+    free(nodeToDestroy);
 }
 
 /**
  * graph_empty() - Create an empty graph.
  * @max_nodes: The maximum number of nodes the graph can hold.
  *
- * Returns: A pointer to the new graph.
  */
 graph *graph_empty(int max_nodes)
 {
+    graph *graph = malloc(sizeof(*graph)); // Allocate to heap the graph struct
+    graph->nodesMatrix = array_2d_create(0, max_nodes, 0, max_nodes, free);
+    graph->nodeMatrixTitles = array_1d_create(0, max_nodes, destroy_node);
+    if (graph->nodesMatrix == NULL || graph == NULL || graph->nodeMatrixTitles == NULL)
+    {
+        fprintf(stderr, "Not enought memory, cannot allocate");
+        return NULL;
+    }
 
+    graph->sizeNodeMatrixTitles = 0;
+    return graph;
 }
 
 /**
@@ -56,16 +82,7 @@ graph *graph_empty(int max_nodes)
  */
 bool graph_is_empty(const graph *g)
 {
-}
-
-/**
- * graph_has_edges() - Check if a graph has any edges.
- * @g: Graph to check.
- *
- * Returns: True if graph has any edges, otherwise false.
- */
-bool graph_has_edges(const graph *g)
-{
+    return array_1d_has_value(g->nodeMatrixTitles, array_1d_low(g->nodeMatrixTitles));
 }
 
 /**
@@ -80,7 +97,16 @@ bool graph_has_edges(const graph *g)
  */
 graph *graph_insert_node(graph *g, const char *s)
 {
+    node *inputNode = malloc(sizeof(*inputNode));
+    inputNode->label = malloc(sizeof(s));
 
+    strcpy(inputNode->label, s); // Copy input string into label
+    inputNode->seen = false;     // Not seen as standard
+
+    array_1d_set_value(g->nodeMatrixTitles, inputNode, g->sizeNodeMatrixTitles);
+    inputNode->index = g->sizeNodeMatrixTitles;
+    g->sizeNodeMatrixTitles++;
+    return g;
 }
 
 /**
@@ -92,6 +118,16 @@ graph *graph_insert_node(graph *g, const char *s)
  */
 node *graph_find_node(const graph *g, const char *s)
 {
+    for (int i = array_1d_low(g->nodeMatrixTitles); i <= array_1d_high(g->nodeMatrixTitles); i++)
+    {
+        node *current = array_1d_inspect_value(g->nodeMatrixTitles, i);
+        if (strcmp(s, current->label) == 0)
+        {
+            return current;
+        }
+    }
+
+    return NULL;
 }
 
 /**
@@ -103,6 +139,7 @@ node *graph_find_node(const graph *g, const char *s)
  */
 bool graph_node_is_seen(const graph *g, const node *n)
 {
+    return n->seen;
 }
 
 /**
@@ -115,6 +152,8 @@ bool graph_node_is_seen(const graph *g, const node *n)
  */
 graph *graph_node_set_seen(graph *g, node *n, bool seen)
 {
+    n->seen = seen;
+    return g;
 }
 
 /**
@@ -125,6 +164,13 @@ graph *graph_node_set_seen(graph *g, node *n, bool seen)
  */
 graph *graph_reset_seen(graph *g)
 {
+    for (int i = 0; i < g->sizeNodeMatrixTitles; i++)
+    {
+        node *current = array_1d_inspect_value(g->nodeMatrixTitles, i);
+        current->seen = false;
+    }
+
+    return g;
 }
 
 /**
@@ -139,45 +185,10 @@ graph *graph_reset_seen(graph *g)
  */
 graph *graph_insert_edge(graph *g, node *n1, node *n2)
 {
-}
-
-/**
- * graph_delete_node() - Remove a node from the graph.
- * @g: Graph to manipulate.
- * @n: Node to remove from the graph.
- *
- * Returns: The modified graph.
- *
- * NOTE: Undefined if the node is not in the graph.
- */
-graph *graph_delete_node(graph *g, node *n)
-{
-}
-
-/**
- * graph_delete_edge() - Remove an edge from the graph.
- * @g: Graph to manipulate.
- * @n1: Source node (pointer) for the edge.
- * @n2: Destination node (pointer) for the edge.
- *NULL
- * Returns: The modified graph.
- *
- * NOTE: Undefined if the edge is not in the graph.
- */
-graph *graph_delete_edge(graph *g, node *n1, node *n2)
-{
-}
-
-/**
- * graph_choose_node() - Return an arbitrary node from the graph.
- * @g: Graph to inspect.
- *
- * Returns: A pointer to an arbitrayry node.
- *
- * NOTE: The return value is undefined for an empty graph.
- */
-node *graph_choose_node(const graph *g)
-{
+    bool* thereIsPath = malloc(sizeof(*thereIsPath));
+    *thereIsPath = true;
+    array_2d_set_value(g->nodesMatrix, thereIsPath, n1->index, n2->index);
+    return g;
 }
 
 /**
@@ -188,8 +199,21 @@ node *graph_choose_node(const graph *g)
  * Returns: A pointer to a list of nodes. Note: The list must be
  * dlist_kill()-ed after use.
  */
-dlist *graph_neighbours(const graph *g,const node *n)
+dlist *graph_neighbours(const graph *g, const node *n)
 {
+
+    dlist *listOfNeighbours = dlist_empty(NULL);
+
+    for (int i = array_2d_low(g->nodesMatrix, 2); i <= array_2d_high(g->nodesMatrix, 2); i++)
+    {
+        if (array_2d_has_value(g->nodesMatrix, n->index, i))
+        {
+            node *neighbour = array_1d_inspect_value(g->nodeMatrixTitles, i);
+            dlist_insert(listOfNeighbours, neighbour, dlist_first(listOfNeighbours));
+        }
+    }
+
+    return listOfNeighbours;
 }
 
 /**
@@ -202,16 +226,46 @@ dlist *graph_neighbours(const graph *g,const node *n)
  */
 void graph_kill(graph *g)
 {
+    array_2d_kill(g->nodesMatrix);
+    array_1d_kill(g->nodeMatrixTitles);
+    free(g);
 }
 
 /**
  * graph_print() - Iterate over the graph elements and print their values.
  * @g: Graph to inspect.
  *
- * Iterates over the graph and prints its contents.
+ * Iterates over the graph and prints itsint contents.
  *
  * Returns: Nothing.
  */
 void graph_print(const graph *g)
 {
+    fprintf(stderr, "      ");
+    for (int i = 0; i < g->sizeNodeMatrixTitles; i++)
+    {
+        node* current = array_1d_inspect_value(g->nodeMatrixTitles, i);
+        fprintf(stderr, " %s", current->label);
+
+    }
+    fprintf(stderr, "\n");
+
+    int i = 0;
+    for (int j = array_2d_low(g->nodesMatrix, 1); j <= array_2d_high(g->nodesMatrix, 1); j++)
+    {
+        fprintf(stderr, "\r");
+        if (i < g->sizeNodeMatrixTitles)
+        {
+            node* current = array_1d_inspect_value(g->nodeMatrixTitles, i);
+            fprintf(stderr, "%s  ", current->label);
+            i++;
+        }
+        
+        for (int k = array_2d_low(g->nodesMatrix, 2); k <= array_2d_high(g->nodesMatrix, 2); k++)
+        {
+            bool value = (bool*)array_2d_inspect_value(g->nodesMatrix, j, k);
+            fprintf(stderr, "  %d   ", value);
+        }
+        fprintf(stderr, "\n");
+    }
 }
