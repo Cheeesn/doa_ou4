@@ -115,13 +115,13 @@ int load_map(map *map, FILE *fp) {
     int edges = 0;
     int i = 0;
     char * my_copy;
-    //Bool that changes when first valid int is found
+    //Bool that changes when the first non comment/blank is found
     while(!find_start){
         
         fgets(buffer,BUFSIZE-1,fp);
         //Checks that the line is not a comment or blank
         if(!line_is_blank(buffer) && !line_is_comment(buffer)){
-            
+            //converting char to int to get the amound of edges
             edges = atoi(buffer);
             find_start = true;
         }
@@ -132,21 +132,23 @@ int load_map(map *map, FILE *fp) {
         fprintf(stderr,"File doesnt contain an integer for edges\n");
         exit(EXIT_FAILURE);
     }
+    //Creating arrays to save the nodes in
     map->src = array_1d_create(0,edges*2,free);
     map->dest = array_1d_create(0,edges*2,free);
+    //looping untill EOF
     while(fgets(buffer,BUFSIZE-1,fp)){
         
         //Checking if the nodes are correctly formated in the file
         if(parse_map_line(buffer,buffernode1,buffernode2) == 2){
-            //Allocating memory space for the array elements
+            //Allocating memory for array element
             my_copy = malloc(sizeof(char) * MAXNODENAME);
             strcpy(my_copy,buffernode1);
-            
+            //setting source array
             array_1d_set_value(map->src,my_copy,i);
-            
+            //Allocating memory for array element again
             my_copy = malloc(sizeof(char) * MAXNODENAME);
             strcpy(my_copy,buffernode2);
-
+            //Setting destination array
             array_1d_set_value(map->dest,my_copy,i);
         }
         //Ignoring comments or blanks in the middle of the textfile
@@ -159,6 +161,7 @@ int load_map(map *map, FILE *fp) {
         }
         i++;
     }
+    //Closing file because it doesnt need to open anymore
     fclose(fp);
     return edges;
 }
@@ -180,22 +183,25 @@ void create_map(graph *graph, int edges,map *m){
     char *bufferdest;
     //Looping through the whole array
     while(i < edges){
+        //saving src/dest to a variable for inserting to graph
         buffersrc = array_1d_inspect_value(m->src,i);
         bufferdest = array_1d_inspect_value(m->dest,i);
         
-        
+        //Finding nodes in graph for laters checks
         node *node1 = graph_find_node(graph, buffersrc);
         node *node2 = graph_find_node(graph, bufferdest);
         
         //Checking if the src node already exists and adding it to the graph if it does'nt
         if(node1 == NULL){
             graph = graph_insert_node(graph, buffersrc);
+            //finding node again otherwise it's undefined
             node1 = graph_find_node(graph, buffersrc);
             
         }
         //The same check but for the destination node
         if(node2 == NULL){
             graph = graph_insert_node(graph, bufferdest);
+            //finding node again otherwise it's undefined
             node2 = graph_find_node(graph, bufferdest);
             
         }
@@ -269,7 +275,7 @@ bool find_path(graph *g, node *src, node *dest){
             node *neighbour = dlist_inspect(neighbourlist,pos);
             //If a match is found in the neighbour list a path is found
             if(nodes_are_equal(neighbour, dest)){
-            
+                //Resetting seen status and freeing memory
                 g = graph_reset_seen(g);
                 queue_kill(q);
                 dlist_kill(neighbourlist);
@@ -285,12 +291,12 @@ bool find_path(graph *g, node *src, node *dest){
             pos = dlist_next(neighbourlist, pos);
             
         }
-    
+    //Freeing the list
     dlist_kill(neighbourlist);
     
     }
 
-    
+    //Freeing the queue and resetting seen status
     queue_kill(q);
     graph_reset_seen(g);
     return false;
@@ -305,9 +311,11 @@ bool find_path(graph *g, node *src, node *dest){
  * @param g - Pointer to the graph structure.
  */
 void Userinput(graph *g){
+    //Buffers for input and nodes
     char input[MAXNODENAME*2+1];
     char node1buffer[MAXNODENAME];
     char node2buffer[MAXNODENAME];
+    //Variable for checking if the input is correct
     int checkinput = 0;
 
     do{
@@ -316,7 +324,7 @@ void Userinput(graph *g){
         fgets(input,sizeof(input),stdin);
         //Variable to check if the input is correctly formatted
         checkinput = parse_map_line(input,node1buffer,node2buffer);
-        
+        //Finding both nodes in the graph
         node *src = graph_find_node(g,node1buffer);
         node *dest = graph_find_node(g,node2buffer);
         //If input is quit exit program
@@ -351,15 +359,21 @@ void Userinput(graph *g){
         
     }while(1);
 }
+
 int main(int argc, const char *argv[]){
     
     FILE *map_file = NULL;
+    //Allocating map struct to save the nodes in
     map *map = malloc(sizeof(*map));
     int edges;
+    //Checking if the file is readable and the if its the correct amount of arguments
     check_file(argv,argc,&map_file);
+    //loading the text file into the struct
     edges = load_map(map,map_file);
     graph *graph = graph_empty(edges*2);
+    //Creating graph
     create_map(graph,edges,map);
+    //Starting user input
     Userinput(graph);
 
     return 0;
