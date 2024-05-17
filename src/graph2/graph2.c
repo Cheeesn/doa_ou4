@@ -8,16 +8,16 @@
 
 typedef struct node
 {
-    char *label;
-    bool seen;
-    int index;
+    char *label;//A string that you use to find the node
+    bool seen;//A bool that corresponds to if the node has been visted
+    int index;//The index the node is in the nodeMatrixTitles array 
 } node;
 
 typedef struct graph
 {
-    array_2d *nodesMatrix;
-    array_1d *nodeMatrixTitles;
-    int sizeNodeMatrixTitles;
+    array_2d *nodesMatrix;//2d array (matrix) representing neighbours of nodes in the graph
+    array_1d *nodeMatrixTitles;//1d array containing titles or labels for each node in the graph
+    int sizeNodeMatrixTitles;//Integer storing the number of titles in nodeMatrixTitles.
 } graph;
 
 /**
@@ -31,7 +31,7 @@ typedef struct graph
 bool nodes_are_equal(const node *n1, const node *n2)
 {
     if (strcmp(n1->label, n2->label))
-    {
+    {//If labels are the same string, it is considered the same label
         return true;
     }
     else
@@ -64,6 +64,8 @@ graph *graph_empty(int max_nodes)
     graph *graph = malloc(sizeof(*graph)); // Allocate to heap the graph struct
     graph->nodesMatrix = array_2d_create(0, max_nodes, 0, max_nodes, free);
     graph->nodeMatrixTitles = array_1d_create(0, max_nodes, destroy_node);
+
+    //Check if the memory was allocated
     if (graph->nodesMatrix == NULL || graph == NULL || graph->nodeMatrixTitles == NULL)
     {
         fprintf(stderr, "Not enought memory, cannot allocate");
@@ -82,7 +84,8 @@ graph *graph_empty(int max_nodes)
  */
 bool graph_is_empty(const graph *g)
 {
-    return array_1d_has_value(g->nodeMatrixTitles, array_1d_low(g->nodeMatrixTitles));
+    // Check if the nodeMatrixTitles array is empty by verifying if the first index has a value
+    return !array_1d_has_value(g->nodeMatrixTitles, array_1d_low(g->nodeMatrixTitles));
 }
 
 /**
@@ -103,9 +106,10 @@ graph *graph_insert_node(graph *g, const char *s)
     strcpy(inputNode->label, s); // Copy input string into label
     inputNode->seen = false;     // Not seen as standard
 
-    array_1d_set_value(g->nodeMatrixTitles, inputNode, g->sizeNodeMatrixTitles);
+    array_1d_set_value(g->nodeMatrixTitles, inputNode, g->sizeNodeMatrixTitles);//Add the node into the title array
     inputNode->index = g->sizeNodeMatrixTitles;
     g->sizeNodeMatrixTitles++;
+    
     return g;
 }
 
@@ -120,6 +124,9 @@ node *graph_find_node(const graph *g, const char *s)
 {
     for (int i = 0; i < g->sizeNodeMatrixTitles; i++)
     {
+        //Go through all nodes in the title array, if the labels are the same as an index,
+        //then we have found the node
+
         node *current = array_1d_inspect_value(g->nodeMatrixTitles, i);
         if (strcmp(s, current->label) == 0)
         {
@@ -127,7 +134,7 @@ node *graph_find_node(const graph *g, const char *s)
         }
     }
 
-    return NULL;
+    return NULL;//Cannot find node
 }
 
 /**
@@ -166,6 +173,7 @@ graph *graph_reset_seen(graph *g)
 {
     for (int i = 0; i < g->sizeNodeMatrixTitles; i++)
     {
+        //Go through every node in the array, and set seen as false (false is the standard value)
         node *current = array_1d_inspect_value(g->nodeMatrixTitles, i);
         current->seen = false;
     }
@@ -201,15 +209,15 @@ graph *graph_insert_edge(graph *g, node *n1, node *n2)
  */
 dlist *graph_neighbours(const graph *g, const node *n)
 {
+    //This function will create a list using the 2d array row, for the specific node (n)
 
     dlist *listOfNeighbours = dlist_empty(NULL);
-
-    for (int i = array_2d_low(g->nodesMatrix, 2); i <= array_2d_high(g->nodesMatrix, 2); i++)
+    for (int i = array_2d_low(g->nodesMatrix, 2); i <= array_2d_high(g->nodesMatrix, 2); i++)//Go through the whole row
     {
-        if (array_2d_has_value(g->nodesMatrix, n->index, i))
+        if (array_2d_has_value(g->nodesMatrix, n->index, i))//If it has a value, there is a neighbour
         {
             node *neighbour = array_1d_inspect_value(g->nodeMatrixTitles, i);
-            dlist_insert(listOfNeighbours, neighbour, dlist_first(listOfNeighbours));
+            dlist_insert(listOfNeighbours, neighbour, dlist_first(listOfNeighbours));//Add neighbour to the list
         }
     }
 
@@ -241,31 +249,37 @@ void graph_kill(graph *g)
  */
 void graph_print(const graph *g)
 {
-    fprintf(stderr, "      ");
+    int i = 0;
+
+    printf("      ");
+
+    // Iterate over the nodes and print their label.
     for (int i = 0; i < g->sizeNodeMatrixTitles; i++)
     {
         node* current = array_1d_inspect_value(g->nodeMatrixTitles, i);
-        fprintf(stderr, " %s", current->label);
+        printf(" %s", current->label);
 
     }
-    fprintf(stderr, "\n");
+    printf("\n");
 
-    int i = 0;
+
     for (int j = array_2d_low(g->nodesMatrix, 1); j <= array_2d_high(g->nodesMatrix, 1); j++)
     {
-        fprintf(stderr, "\r");
+        printf("\r");
         if (i < g->sizeNodeMatrixTitles)
         {
-            node* current = array_1d_inspect_value(g->nodeMatrixTitles, i);
-            fprintf(stderr, "%s  ", current->label);
+            //Prints the labels of the nodes, on the left side of the matrix
+            node* current = array_1d_inspect_value(g->nodeMatrixTitles, j);
+            printf("%s  ", current->label);
             i++;
         }
         
+        //This for-loop prints all the values in the 2d array for this specific row
         for (int k = array_2d_low(g->nodesMatrix, 2); k <= array_2d_high(g->nodesMatrix, 2); k++)
         {
             bool value = (bool*)array_2d_inspect_value(g->nodesMatrix, j, k);
-            fprintf(stderr, "  %d   ", value);
+            printf("  %d   ", value);
         }
-        fprintf(stderr, "\n");
+        printf("\n");
     }
 }

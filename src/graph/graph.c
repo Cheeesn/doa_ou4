@@ -325,23 +325,32 @@ void graph_kill(graph *g)
  *
  * Iterates over the graph and prints its contents.
  *
- * Returns: Nothing.
+ * Returns: Nothings.
  */
 void graph_print(const graph *g)
 {
     dlist_pos pos = dlist_first(g->nodes);
+
+    // Iterate over all nodes in the graph.
     while (!dlist_is_end(g->nodes, pos))
     {
         node* current = dlist_inspect(g->nodes, pos);
-        printf("%s\n", current->label);
+        printf("%s\n", current->label);//Print label
+
+        // Check if the current node has any neighbors.
         if (!dlist_is_empty(current->neighbors))
         {
             dlist_pos posNeighbours = dlist_first(current->neighbors);
             int neighbourNum = 0;
+
+            // Iterate over all neighbors of the current node.
             while (!dlist_is_end(current->neighbors, posNeighbours))
             {
                 node* currentNeighbour = dlist_inspect(current->neighbors, posNeighbours);
+
+                // Print the label of the current neighbor with indentation.
                 printf("   %s \n", currentNeighbour->label);
+                
                 neighbourNum++;
                 posNeighbours = dlist_next(current->neighbors, posNeighbours);
             }
