@@ -329,7 +329,7 @@ void Userinput(graph *g){
         node *dest = graph_find_node(g,node2buffer);
         //If input is quit exit program
         if(strcmp(node1buffer, "quit") == 0){
-            
+            printf("Normal exit.\n")
             graph_kill(g);
             return;
         }
@@ -347,10 +347,10 @@ void Userinput(graph *g){
             //If find path returns true there is a path between src and node
             else if(find_path(g,src,dest)){
                 
-                printf("path is found\n");
+                printf("There is a path from %s to %s.\n", node1buffer, node2buffer);
             }
             else{
-                printf("there is no path\n");
+                printf("There is no path from %s to %s.\n", node1buffer, node2buffer);
             }
         }
         else{
