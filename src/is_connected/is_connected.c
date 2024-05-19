@@ -329,7 +329,7 @@ void Userinput(graph *g){
         node *dest = graph_find_node(g,node2buffer);
         //If input is quit exit program
         if(strcmp(node1buffer, "quit") == 0){
-            printf("Normal exit.\n")
+            printf("Normal exit.\n");
             graph_kill(g);
             return;
         }
