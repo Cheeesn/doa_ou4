@@ -106,7 +106,6 @@ graph *graph_insert_node(graph *g, const char *s)
     inputNode->label = malloc(sizeof(s));
 
     strcpy(inputNode->label, s);//Copy input string into label
-/* code */
     inputNode->seen = false;//Not seen as standard
     inputNode->neighbors = dlist_empty(NULL);//Create neighbour list
 
@@ -278,14 +277,20 @@ node *graph_choose_node(const graph *g)
  */
 dlist *graph_neighbours(const graph *g,const node *n)
 {
+    if (dlist_is_empty(n->neighbors))
+    {
+        return dlist_empty(NULL);
+    }
+
     dlist *copyNeighbours = dlist_empty(NULL);//Create a copy of current neighbour list
     dlist_pos pos = dlist_first(n->neighbors);
+
     while (!dlist_is_end(n->neighbors, pos))
     {
         //Get out all nodes in the neighbour list, and then add it to the copyNeighbours list
         
-        node* current = dlist_inspect(n->neighbors, pos);
-        dlist_insert(copyNeighbours, current, dlist_first(copyNeighbours));
+        void* value = dlist_inspect(n->neighbors, pos);
+        dlist_insert(copyNeighbours, value, dlist_first(copyNeighbours));
         pos = dlist_next(n->neighbors, pos);
     }   
     

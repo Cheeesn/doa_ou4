@@ -187,9 +187,8 @@ void create_map(graph *graph, int edges,map *m){
         buffersrc = array_1d_inspect_value(m->src,i);
         bufferdest = array_1d_inspect_value(m->dest,i);
         
-        //Finding nodes in graph for laters checks
+        //Check if a node with the name in buffersrc exists
         node *node1 = graph_find_node(graph, buffersrc);
-        node *node2 = graph_find_node(graph, bufferdest);
         
         //Checking if the src node already exists and adding it to the graph if it does'nt
         if(node1 == NULL){
@@ -198,6 +197,10 @@ void create_map(graph *graph, int edges,map *m){
             node1 = graph_find_node(graph, buffersrc);
             
         }
+        
+        //Check if a node with the name in bufferdest exists
+        node *node2 = graph_find_node(graph, bufferdest);
+
         //The same check but for the destination node
         if(node2 == NULL){
             graph = graph_insert_node(graph, bufferdest);
